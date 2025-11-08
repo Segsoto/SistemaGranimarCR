@@ -36,7 +36,8 @@ const navigationItems: NavItem[] = [
     children: [
       { label: 'Materiales', href: '/inventario', icon: Package },
       { label: 'Herramientas', href: '/inventario/herramientas/discos', icon: Wrench },
-      { label: 'Retiros', href: '/inventario/retiros', icon: ShoppingCart },
+      { label: 'Retiros Materiales', href: '/inventario/retiros', icon: ShoppingCart },
+      { label: 'Retiros Herramientas', href: '/inventario/herramientas/discos/retiros', icon: Wrench },
     ],
   },
   {

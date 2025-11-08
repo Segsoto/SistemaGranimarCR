@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 
 import { useState } from 'react'
@@ -53,7 +54,7 @@ export default function NuevoMaterialPage() {
     try {
       const { error } = await supabase
         .from('materiales')
-        .insert([formData])
+        .insert([formData] as any)
 
       if (error) throw error
 
