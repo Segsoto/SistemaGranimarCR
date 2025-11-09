@@ -34,6 +34,9 @@ NEXT_PUBLIC_SUPABASE_STORAGE_URL=https://vavlehrkorioncfloedn.supabase.co/storag
 3. Ejecuta los scripts en orden:
    - `migrations/001_initial_setup.sql` - Crea todas las tablas, índices y funciones
    - `migrations/002_storage_setup.sql` - Configura el storage para imágenes
+   - `migrations/009_update_retiros_sobros.sql` - Actualiza sistema de retiros y sobrantes
+   - `migrations/010_add_imagen_to_materiales.sql` - Agrega soporte de imágenes a materiales
+   - `migrations/011_insert_initial_materials.sql` - (Opcional) Inserta 10 materiales iniciales
 
 ### 4. Iniciar Servidor de Desarrollo
 
@@ -84,10 +87,12 @@ SistemaGranimarCR/
 - Accesos rápidos a funciones principales
 
 ### 2. **Inventario de Materiales**
-- CRUD completo de materiales
-- Movimientos de entrada/salida
-- Alertas de stock mínimo
-- Historial de movimientos
+- CRUD completo de materiales con imágenes de referencia
+- Movimientos de entrada/salida con validaciones
+- Sistema de retiros por láminas completas y metros lineales
+- Gestión inteligente de sobrantes reutilizables
+- Alertas de stock mínimo y notificaciones por email
+- Historial completo de movimientos
 - Búsqueda y filtros avanzados
 
 ### 3. **Inventario de Discos/Herramientas**
@@ -126,14 +131,15 @@ SistemaGranimarCR/
 
 ### Tablas Principales
 
-- **materiales**: Inventario de materiales de producción
-- **materiales_movimientos**: Historial de entradas/salidas
+- **materiales**: Inventario de materiales con imágenes (cantidad_laminas, metros_lineales, precios)
+- **materiales_movimientos**: Historial de entradas/salidas con validaciones
+- **retiros**: Retiros por láminas completas o metros lineales
+- **sobrantes**: Sobrantes reutilizables generados de retiros
+- **produccion_sobres**: Órdenes de producción con costos (material_usado)
 - **discos**: Herramientas y consumibles con imágenes
 - **discos_movimientos**: Uso de herramientas
-- **produccion**: Órdenes de producción con costos
-- **gastos**: Gastos operativos (fijos y variables)
+- **gastos**: Gastos operativos con categorización
 - **proveedores**: Información de proveedores
-- **retiros**: Retiros de material para proyectos
 
 ### Funciones RPC
 
@@ -197,6 +203,8 @@ Todas las tablas tienen RLS habilitado. Las políticas actuales permiten:
 
 ### Storage
 - Bucket `discos-images` configurado como público para lectura
+- Bucket `materiales` configurado como público para imágenes de referencia
+- Límite de 5MB por archivo (JPG, PNG, WEBP)
 - Solo usuarios autenticados pueden subir/modificar/eliminar
 
 ## 📝 Scripts Disponibles
@@ -209,39 +217,57 @@ npm run dev          # Inicia servidor de desarrollo
 npm run build        # Construye la aplicación
 npm start            # Inicia servidor de producción
 
-# Linting
+# Linting y Type Checking
 npm run lint         # Ejecuta ESLint
-
-# Type Checking
 npm run type-check   # Verifica tipos TypeScript
+
+# Deployment
+npm run pre-deploy   # Verifica type-check + lint + build (antes de deploy)
+npm run clean        # Limpia cache (.next, out, node_modules/.cache)
+npm run reinstall    # Reinstala todas las dependencias desde cero
 ```
 
-## 🚀 Despliegue en Vercel
+## 🚀 Despliegue a Producción
 
-### Despliegue Automático
+### 📖 Documentación Completa de Deployment
 
-1. **Conecta el repositorio a Vercel**
+Para desplegar en Vercel, consulta:
+
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Guía completa paso a paso (400+ líneas)
+- **[DEPLOY_CHECKLIST.md](./DEPLOY_CHECKLIST.md)** - Checklist de verificación pre-deploy
+
+### Resumen Rápido
+
+1. **Verificar proyecto localmente**
    ```bash
-   npm install -g vercel
-   vercel
+   npm run pre-deploy  # Ejecuta type-check + lint + build
    ```
 
-2. **Configura las variables de entorno en Vercel**
-   - Ve a Project Settings > Environment Variables
-   - Agrega las mismas variables del `.env.local`
-
-3. **Push a GitHub**
+2. **Push a GitHub**
    ```bash
+   git add .
+   git commit -m "Preparar para deploy"
    git push origin main
    ```
-   
-   Vercel desplegará automáticamente en cada push.
 
-### Despliegue Manual
+3. **Importar en Vercel**
+   - Ve a [vercel.com/new](https://vercel.com/new)
+   - Importa el repositorio de GitHub
+   - Configura las variables de entorno
+   - Deploy automático
 
-```bash
-vercel --prod
-```
+4. **Variables de Entorno Requeridas**
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL
+   NEXT_PUBLIC_SUPABASE_ANON_KEY
+   NEXT_PUBLIC_SUPABASE_STORAGE_URL
+   RESEND_API_KEY
+   ```
+
+5. **Configurar Base de Datos en Producción**
+   - Ejecutar migraciones en Supabase
+   - Crear bucket `materiales` (público)
+   - Verificar políticas de storage
 
 ## 🔧 Configuración Avanzada
 
@@ -280,12 +306,24 @@ export const revalidate = 60 // Revalidar cada 60 segundos
 - Verifica que las tablas se crearon correctamente
 
 ### Error de CORS en Storage
-- Verifica que el bucket `discos-images` exista
+- Verifica que los buckets `discos-images` y `materiales` existan
 - Ejecuta el script `002_storage_setup.sql`
+- Ejecuta el script `010_add_imagen_to_materiales.sql`
 
 ### Imágenes no cargan
 - Verifica la configuración de `next.config.js`
 - Asegúrate de que las URLs sean públicas
+- Verifica que los buckets estén marcados como públicos en Supabase
+
+### Emails de alertas no se envían
+- Verifica que `RESEND_API_KEY` esté configurada
+- Verifica que la API key de Resend sea válida
+- Revisa la función `sendStockAlert()` en `src/lib/stockAlerts.ts`
+
+### Build falla en producción
+- Ejecuta `npm run pre-deploy` localmente primero
+- Verifica que todas las variables de entorno estén configuradas
+- Revisa los logs de build en Vercel
 
 ## 📚 Recursos
 

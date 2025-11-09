@@ -1,0 +1,74 @@
+🚀 Preparar proyecto para deployment en Vercel
+
+## ✅ Características Completas
+
+### Dashboard
+- Mostrar datos reales desde base de datos
+- Valor total del inventario (cantidad_laminas * precio_costo)
+- Gastos del mes actual
+- Producción del mes (material_usado)
+- Alertas de stock bajo
+
+### Módulo de Materiales
+- CRUD completo con validaciones
+- Upload de imágenes desde computador a Supabase Storage
+- Sistema de entrada y salida con validaciones de stock
+- Eliminación con validación de dependencias
+- Confirmación para eliminar materiales con sobrantes
+- Preview de imágenes antes de guardar
+
+### Sistema de Retiros y Sobrantes
+- Retiros por láminas completas
+- Retiros por metros lineales
+- Generación automática de sobrantes
+- Consumo inteligente de sobrantes disponibles
+- Validación de stock disponible
+
+### Notificaciones
+- Alertas por email cuando stock llega a 0
+- Integración con Resend API
+
+## 🗄️ Base de Datos
+
+### Migraciones Incluidas
+- 009_update_retiros_sobros.sql (Sistema de retiros actualizado)
+- 010_add_imagen_to_materiales.sql (Soporte de imágenes)
+- 011_insert_initial_materials.sql (10 materiales iniciales)
+
+### Storage
+- Bucket 'materiales' configurado (público)
+- Límite de 5MB por archivo
+- Formatos: JPG, PNG, WEBP
+
+## 📚 Documentación de Deployment
+
+### Archivos Creados
+- DEPLOYMENT.md (Guía completa paso a paso)
+- DEPLOY_CHECKLIST.md (Checklist de verificación)
+- .env.local.example (Template de variables de entorno)
+- .env.production.example (Template para producción)
+- scripts/pre-deploy.sh (Script de verificación)
+
+### Configuración
+- next.config.js optimizado con headers de seguridad
+- package.json con scripts de deployment
+- .gitignore actualizado
+- README.md completo y actualizado
+
+## 🔐 Variables de Entorno Requeridas
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- NEXT_PUBLIC_SUPABASE_STORAGE_URL
+- RESEND_API_KEY
+
+## 🎯 Próximos Pasos
+1. Importar proyecto en Vercel desde GitHub
+2. Configurar variables de entorno en Vercel Dashboard
+3. Ejecutar migraciones en Supabase de producción
+4. Crear bucket 'materiales' en Supabase Storage
+5. Verificar deployment en producción
+
+---
+
+Fecha: Diciembre 2024
+Estado: Listo para producción ✅
