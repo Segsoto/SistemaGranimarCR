@@ -136,12 +136,16 @@ export default function RetirosPendientesPage() {
 
       for (const retiro of retirosSeleccionados) {
         try {
+          // Asegurar que el campo `cliente` no sea nulo (la tabla tiene NOT NULL)
+          const clienteValor = retiro.cliente && retiro.cliente.trim() ? retiro.cliente : 'Cliente no definido'
+          if (!retiro.cliente) console.warn(`Retiro ${retiro.id} sin cliente definido — usando '${clienteValor}' como fallback`)
+
           const { data, error } = await supabase
             .from('facturacion')
             .insert({
               retiro_id: retiro.id,
               proyecto: retiro.proyecto,
-              cliente: retiro.cliente,
+              cliente: clienteValor,
               monto_total: retiro.precio_venta_total,
               monto_pagado: 0,
               estado: 'pendiente',

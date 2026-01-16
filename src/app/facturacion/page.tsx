@@ -165,6 +165,45 @@ export default function FacturacionPage() {
     }
   }
 
+  // Delete invoice with password confirmation
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [toDeleteId, setToDeleteId] = useState<string | null>(null)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleting, setDeleting] = useState(false)
+
+  const requestDelete = (id: string) => {
+    setToDeleteId(id)
+    setDeletePassword('')
+    setShowDeleteModal(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!toDeleteId) return
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/facturacion/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: toDeleteId, password: deletePassword }),
+      })
+
+      const data = await res.json()
+      if (!res.ok || !data.ok) {
+        throw new Error(data?.message || 'Error eliminando factura')
+      }
+
+      toast.success('Factura eliminada')
+      setShowDeleteModal(false)
+      setToDeleteId(null)
+      fetchFacturas()
+    } catch (err: any) {
+      console.error('Error deleting factura:', err)
+      toast.error(err?.message || 'Error al eliminar factura')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const handleDescargarReportePeriodo = () => {
     try {
       const ahora = new Date()
@@ -213,6 +252,7 @@ export default function FacturacionPage() {
   }
 
   return (
+    <>
     <div className="space-y-6">
       {/* Header */}
       <div className="page-header">
@@ -444,6 +484,13 @@ export default function FacturacionPage() {
                           >
                             <Download className="w-4 h-4" />
                           </button>
+                          <button
+                            onClick={() => requestDelete(factura.id)}
+                            className="btn btn-sm btn-danger"
+                            title="Eliminar factura"
+                          >
+                            Eliminar
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -508,5 +555,25 @@ export default function FacturacionPage() {
         </div>
       </div>
     </div>
+    {showDeleteModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <h3 className="text-lg font-semibold mb-2">Eliminar factura</h3>
+          <p className="text-sm text-gray-600 mb-4">Ingresa la contraseña para confirmar la eliminación.</p>
+          <input
+            type="password"
+            className="input w-full mb-3"
+            value={deletePassword}
+            onChange={(e) => setDeletePassword(e.target.value)}
+            autoFocus
+          />
+          <div className="flex justify-end gap-2">
+            <button className="btn btn-ghost" onClick={() => setShowDeleteModal(false)} disabled={deleting}>Cancelar</button>
+            <button className="btn btn-danger" onClick={confirmDelete} disabled={deleting}>{deleting ? 'Eliminando...' : 'Confirmar eliminación'}</button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }

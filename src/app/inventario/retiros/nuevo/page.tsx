@@ -312,8 +312,10 @@ export default function NuevoRetiroPage() {
       toast.success('Retiro registrado exitosamente')
       router.push('/inventario/retiros')
     } catch (error: any) {
+      // Mostrar info completa del error para diagnóstico
       console.error('Error creating retiro:', error)
-      toast.error('Error: ' + error.message)
+      const errText = error?.message || (typeof error === 'object' ? JSON.stringify(error) : String(error))
+      toast.error('Error al crear retiro: ' + errText)
     } finally {
       setLoading(false)
     }
