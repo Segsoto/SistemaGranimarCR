@@ -51,8 +51,8 @@ export const generarPDFFactura = (factura: Factura, pagos: Pago[]) => {
   
   // Información de la empresa (derecha)
   doc.setFontSize(8)
-  doc.text('Tel: +506 XXXX-XXXX', 150, 15, { align: 'left' })
-  doc.text('info@granimarcr.com', 150, 20, { align: 'left' })
+  doc.text('Tel: +506 62640388', 150, 15, { align: 'left' })
+  doc.text('granimarcr@gmail.com', 150, 20, { align: 'left' })
   doc.text('San José, Costa Rica', 150, 25, { align: 'left' })
   
   yPosition = 45
