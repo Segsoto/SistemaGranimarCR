@@ -47,7 +47,9 @@ export default function ReportesPage() {
     try {
       // Obtener gastos del mes
       const startDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-01`
-      const endDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-31`
+      // Calcular último día del mes seleccionado de forma correcta
+      const lastDay = new Date(selectedYear, selectedMonth, 0).getDate()
+      const endDate = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
 
       const { data: gastos } = await supabase
         .from('gastos')

@@ -70,6 +70,11 @@ const navigationItems: NavItem[] = [
     href: '/reportes',
     icon: FileText,
   },
+  {
+    label: 'Configuración',
+    href: '/configuracion',
+    icon: Wrench,
+  },
 ]
 
 export default function Navigation() {

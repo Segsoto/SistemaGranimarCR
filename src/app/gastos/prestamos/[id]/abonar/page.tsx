@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { formatCurrency, getDateInputValue } from '@/lib/utils'
+import { formatCurrency, formatCurrencyCRC, getDateInputValue } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import { ArrowLeft, Save, Calculator } from 'lucide-react'
 import Link from 'next/link'
@@ -88,9 +88,10 @@ export default function AbonarPrestamoPage() {
       let monto_capital = 0
 
       if (monto >= intereses) {
-        // El abono cubre los intereses y algo de capital
+        // El abono cubre los intereses y algo de capital (restando también póliza y saldo_debito si vienen)
         monto_interes = intereses
-        monto_capital = monto - intereses
+        const restante = monto - intereses - (formData.saldo_debito || 0) - (formData.poliza || 0)
+        monto_capital = restante > 0 ? restante : 0
       } else {
         // El abono solo cubre parte de los intereses
         monto_interes = monto
@@ -108,7 +109,7 @@ export default function AbonarPrestamoPage() {
       // Sin interés, todo va a capital
       setFormData(prev => ({
         ...prev,
-        monto_capital: monto,
+        monto_capital: monto - (prev.saldo_debito || 0) - (prev.poliza || 0),
         monto_interes: 0,
       }))
       toast.success('Todo el monto va a capital')
@@ -128,8 +129,9 @@ export default function AbonarPrestamoPage() {
       return
     }
 
-    if (formData.monto_capital + formData.monto_interes !== formData.monto) {
-      toast.error('La suma de capital e interés debe ser igual al monto total')
+    const totalDistribuido = formData.monto_capital + formData.monto_interes + (formData.saldo_debito || 0) + (formData.poliza || 0)
+    if (Math.abs(totalDistribuido - formData.monto) > 0.001) {
+      toast.error('La suma de capital, interés, saldo_debito y póliza debe ser igual al monto total')
       return
     }
 
@@ -347,13 +349,16 @@ export default function AbonarPrestamoPage() {
             {formData.monto > 0 && (
               <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Capital + Interés:</span>
+                  <span className="text-gray-600">Capital + Interés + Saldo Débito + Póliza:</span>
                   <span className={`font-semibold ${
-                    formData.monto_capital + formData.monto_interes === formData.monto 
-                      ? 'text-green-600' 
+                    Math.abs((formData.monto_capital + formData.monto_interes + (formData.saldo_debito || 0) + (formData.poliza || 0)) - formData.monto) <= 0.001
+                      ? 'text-green-600'
                       : 'text-red-600'
                   }`}>
-                    {formatCurrency(formData.monto_capital + formData.monto_interes)}
+                    {prestamo.moneda === 'USD'
+                      ? formatCurrency(formData.monto_capital + formData.monto_interes + (formData.saldo_debito || 0) + (formData.poliza || 0))
+                      : formatCurrencyCRC(formData.monto_capital + formData.monto_interes + (formData.saldo_debito || 0) + (formData.poliza || 0))
+                    }
                   </span>
                 </div>
                 <div className="flex justify-between text-sm mt-1">
@@ -362,7 +367,7 @@ export default function AbonarPrestamoPage() {
                     {formatCurrency(formData.monto)}
                   </span>
                 </div>
-                {formData.monto_capital + formData.monto_interes !== formData.monto && (
+                {Math.abs((formData.monto_capital + formData.monto_interes + (formData.saldo_debito || 0) + (formData.poliza || 0)) - formData.monto) > 0.001 && (
                   <p className="text-xs text-red-600 mt-2">
                     ⚠️ La suma debe ser igual al monto del abono
                   </p>
@@ -444,7 +449,7 @@ export default function AbonarPrestamoPage() {
           </Link>
           <button
             type="submit"
-            disabled={loading || formData.monto_capital + formData.monto_interes !== formData.monto}
+            disabled={loading || Math.abs((formData.monto_capital + formData.monto_interes + (formData.saldo_debito || 0) + (formData.poliza || 0)) - formData.monto) > 0.001}
             className="btn btn-primary"
           >
             {loading ? (

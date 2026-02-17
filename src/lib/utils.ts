@@ -22,6 +22,17 @@ export const formatCRC = (value: number, rate?: number): string => {
   return `₡ ${formatted} (CRC)`
 }
 
+// Formatear un valor ya expresado en CRC (no multiplica por tasa)
+export const formatCurrencyCRC = (value: number): string => {
+  const formatted = new Intl.NumberFormat('es-CR', {
+    style: 'currency',
+    currency: 'CRC',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)
+  return formatted
+}
+
 // Obtener tasa USD -> CRC desde variable de entorno `NEXT_PUBLIC_USD_TO_CRC`.
 // Si no está definida, usar un valor razonable por defecto.
 export const getUSDToCRC = (): number => {
@@ -38,8 +49,31 @@ export const getUSDToCRC = (): number => {
 
 // Asynchronous getter that fetches a fresh USD->CRC rate (uses exchangerate.host)
 export const getUSDToCRCAsync = async (date?: string): Promise<number> => {
+  // Primero intentar la API interna que respeta la configuración (`/api/tc`).
   try {
-    // dynamic import to avoid circular deps in some environments
+    // Construir URL absoluta cuando sea necesario
+    let apiUrl = '/api/tc'
+    if (date) apiUrl += `?date=${encodeURIComponent(date)}`
+
+    // En servidor no hay `window`; intentar usar una URL base conocida
+    if (typeof window === 'undefined') {
+      const base = process.env.NEXT_PUBLIC_SITE_URL || (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : '')
+      if (base) apiUrl = `${base}${apiUrl}`
+    }
+
+    const res = await fetch(apiUrl)
+    if (res.ok) {
+      const json = await res.json()
+      const rate = Number(json.rate)
+      if (!isNaN(rate) && rate > 0) return rate
+    }
+  } catch (err) {
+    // ignore and fallback to direct fetch
+    console.warn('API /api/tc failed, falling back to direct providers:', err)
+  }
+
+  // Fallback: dynamic import to call provider functions directly
+  try {
     const mod = await import('./exchange')
     return await mod.fetchUSDToCRC(date)
   } catch (e) {

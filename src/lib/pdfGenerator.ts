@@ -1,7 +1,7 @@
 // @ts-nocheck
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { formatCurrency as formatUSD, formatCRC, formatNumber, getUSDToCRC, getUSDToCRCAsync } from './utils'
+import { formatCurrency as formatUSD, formatCRC, formatNumber, getUSDToCRC, getUSDToCRCAsync, formatCurrencyWithCRC } from './utils'
 
 interface Factura {
   id: string

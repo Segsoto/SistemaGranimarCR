@@ -64,13 +64,10 @@ export default function GastosPage() {
 
   const fetchTipoCambio = async () => {
     try {
-      const response = await fetch('https://api.hacienda.go.cr/indicadores/tc/dolar')
-      const data = await response.json()
-      
-      if (data && data.length > 0) {
-        // Tomar el valor de venta del dólar del último registro
-        const ultimoRegistro = data[data.length - 1]
-        setTipoCambio(parseFloat(ultimoRegistro.venta.valor))
+      const res = await fetch('/api/tc')
+      const data = await res.json()
+      if (data?.rate) {
+        setTipoCambio(Number(data.rate))
       }
     } catch (error) {
       console.error('Error fetching tipo cambio:', error)

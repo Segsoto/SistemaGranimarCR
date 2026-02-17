@@ -70,8 +70,9 @@ export default function EditarAbonoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (formData.monto <= 0) { toast.error('El monto debe ser mayor a 0'); return }
-    if (formData.monto_capital + formData.monto_interes !== formData.monto) {
-      toast.error('La suma de capital e interés debe ser igual al monto total')
+    const totalDistribuido = formData.monto_capital + formData.monto_interes + (formData.saldo_debito || 0) + (formData.poliza || 0)
+    if (Math.abs(totalDistribuido - formData.monto) > 0.001) {
+      toast.error('La suma de capital, interés, saldo_debito y póliza debe ser igual al monto total')
       return
     }
 
