@@ -75,12 +75,14 @@ export default function NuevoGastoPage() {
 
     setLoading(true)
     try {
-      const { mes, anio } = getMonthYear(formData.fecha)
-      
+      const fechaStr = formData.fecha ? getDateInputValue(formData.fecha) : getDateInputValue()
+      const { mes, anio } = getMonthYear(fechaStr)
+
       const { error } = await supabase
         .from('gastos')
         .insert([{
           ...formData,
+          fecha: fechaStr,
           mes,
           anio,
           proveedor_id: formData.proveedor_id || null,

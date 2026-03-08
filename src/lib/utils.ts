@@ -37,6 +37,7 @@ export const formatCurrencyCRC = (value: number): string => {
 // Si no está definida, usar un valor razonable por defecto.
 export const getUSDToCRC = (): number => {
   try {
+    // Use fixed rate of 500 as requested
     if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_USD_TO_CRC) {
       const parsed = parseFloat(String(process.env.NEXT_PUBLIC_USD_TO_CRC))
       if (!isNaN(parsed) && parsed > 0) return parsed
@@ -44,41 +45,13 @@ export const getUSDToCRC = (): number => {
   } catch (e) {
     // ignore
   }
-  return 615.0 // fallback rate (puede ajustarse en entorno)
+  return 500.0 // fixed rate per request
 }
 
 // Asynchronous getter that fetches a fresh USD->CRC rate (uses exchangerate.host)
 export const getUSDToCRCAsync = async (date?: string): Promise<number> => {
-  // Primero intentar la API interna que respeta la configuración (`/api/tc`).
-  try {
-    // Construir URL absoluta cuando sea necesario
-    let apiUrl = '/api/tc'
-    if (date) apiUrl += `?date=${encodeURIComponent(date)}`
-
-    // En servidor no hay `window`; intentar usar una URL base conocida
-    if (typeof window === 'undefined') {
-      const base = process.env.NEXT_PUBLIC_SITE_URL || (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : '')
-      if (base) apiUrl = `${base}${apiUrl}`
-    }
-
-    const res = await fetch(apiUrl)
-    if (res.ok) {
-      const json = await res.json()
-      const rate = Number(json.rate)
-      if (!isNaN(rate) && rate > 0) return rate
-    }
-  } catch (err) {
-    // ignore and fallback to direct fetch
-    console.warn('API /api/tc failed, falling back to direct providers:', err)
-  }
-
-  // Fallback: dynamic import to call provider functions directly
-  try {
-    const mod = await import('./exchange')
-    return await mod.fetchUSDToCRC(date)
-  } catch (e) {
-    return getUSDToCRC()
-  }
+  // Return fixed rate of 500 (no external calls)
+  return getUSDToCRC()
 }
 
 // Formatea un monto en USD y añade entre paréntesis el equivalente en colones (CRC).
@@ -131,14 +104,33 @@ export const formatShortDate = (date: string | Date): string => {
 }
 
 // Obtener fecha en formato YYYY-MM-DD para inputs
-export const getDateInputValue = (date?: Date): string => {
-  const d = date || new Date()
+export const getDateInputValue = (date?: Date | string): string => {
+  let d: Date
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const [y, m, day] = date.split('-').map(Number)
+    d = new Date(y, m - 1, day)
+  } else if (date instanceof Date) {
+    d = date
+  } else if (typeof date === 'string') {
+    d = new Date(date)
+  } else {
+    d = new Date()
+  }
   return d.toISOString().split('T')[0]
 }
 
-// Extraer mes y año de una fecha
+// Extraer mes y año de una fecha (parsea YYYY-MM-DD como fecha local)
 export const getMonthYear = (date: string | Date): { mes: number; anio: number } => {
-  const d = typeof date === 'string' ? new Date(date) : date
+  let d: Date
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const [y, m, day] = date.split('-').map(Number)
+    d = new Date(y, m - 1, day)
+  } else if (typeof date === 'string') {
+    d = new Date(date)
+  } else {
+    d = date
+  }
+
   return {
     mes: d.getMonth() + 1, // 1-12
     anio: d.getFullYear(),

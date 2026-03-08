@@ -76,7 +76,7 @@ export default function EditarGastoPage() {
           is_planilla: data.is_planilla || false,
           frecuencia_pago: data.frecuencia_pago || '',
           proxima_fecha_pago: data.proxima_fecha_pago || '',
-          fecha: data.fecha || getDateInputValue(),
+          fecha: data.fecha ? getDateInputValue(data.fecha) : getDateInputValue(),
           proveedor_id: data.proveedor_id || '',
           notas: data.notas || '',
         })

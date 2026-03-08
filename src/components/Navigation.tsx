@@ -212,7 +212,7 @@ export default function Navigation() {
               <div className="text-xs text-gray-500">
                 © 2025 Granimar CR
                 <br />
-                v1.0.0
+                v1.0.1
               </div>
               <div>
                 {authenticated === null ? null : authenticated ? (

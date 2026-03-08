@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, getUSDToCRCAsync } from '@/lib/utils'
 import { DollarSign, Plus, Search, Edit, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
@@ -64,15 +64,11 @@ export default function GastosPage() {
 
   const fetchTipoCambio = async () => {
     try {
-      const res = await fetch('/api/tc')
-      const data = await res.json()
-      if (data?.rate) {
-        setTipoCambio(Number(data.rate))
-      }
+      const rate = await getUSDToCRCAsync()
+      setTipoCambio(Number(rate))
     } catch (error) {
-      console.error('Error fetching tipo cambio:', error)
-      // Usar tipo de cambio por defecto si falla
-      setTipoCambio(520)
+      console.error('Error getting tipo cambio:', error)
+      setTipoCambio(500)
     }
   }
 
@@ -265,7 +261,14 @@ export default function GastosPage() {
                 filteredGastos.map((gasto) => (
                   <tr key={gasto.id}>
                     <td>
-                      {new Date(gasto.fecha).toLocaleDateString('es-CR')}
+                      {(() => {
+                        const s = gasto.fecha
+                        if (typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s)) {
+                          const [y, m, d] = s.split('-').map(Number)
+                          return new Date(y, m - 1, d).toLocaleDateString('es-CR')
+                        }
+                        return new Date(s).toLocaleDateString('es-CR')
+                      })()}
                     </td>
                     <td>
                       <div className="font-medium text-gray-900">
