@@ -185,18 +185,27 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="page-header">
-        <h1 className="page-title">Dashboard</h1>
-        <p className="page-subtitle">
-          Resumen general del sistema de gestión Granimar CR
-        </p>
+      <div className="page-header flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">
+            Granimar CR
+          </p>
+          <h1 className="page-title">Dashboard</h1>
+          <p className="page-subtitle">
+            Resumen general del sistema de gestión
+          </p>
+        </div>
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-teal-100 bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-800">
+          <span className="h-2 w-2 rounded-full bg-teal-500" />
+          Panel de control
+        </div>
       </div>
 
       {/* Stock Alerts Banner */}
       <StockAlertBanner />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         {/* Valor Inventario en Costo */}
         <div className="stat-card">
           <div className="flex items-center justify-between">

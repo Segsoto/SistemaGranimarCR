@@ -21,9 +21,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen bg-slate-50">
           <Navigation />
-          <main className="flex-1 lg:ml-72 p-6 lg:p-8">
+          <main className="min-w-0 flex-1 p-4 pt-20 sm:p-6 sm:pt-20 lg:ml-72 lg:p-8">
             {children}
           </main>
         </div>

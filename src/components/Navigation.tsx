@@ -112,12 +112,12 @@ export default function Navigation() {
             }
           }}
           className={`
-            flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all
+            flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-200
             ${depth > 0 ? 'pl-12' : ''}
             ${
               active
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-teal-600'
+                ? 'bg-teal-600 text-white shadow-md shadow-teal-900/10'
+                : 'text-slate-600 hover:bg-teal-50 hover:text-teal-800'
             }
           `}
         >
@@ -169,8 +169,9 @@ export default function Navigation() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 btn btn-primary"
+        className="lg:hidden fixed top-4 left-4 z-50 btn btn-primary shadow-lg shadow-teal-900/20"
         aria-label="Toggle menu"
+        aria-expanded={isOpen}
       >
         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
@@ -178,7 +179,7 @@ export default function Navigation() {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          className="lg:hidden fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-40"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -186,7 +187,7 @@ export default function Navigation() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-screen w-72 bg-white border-r border-gray-200 z-40
+          fixed top-0 left-0 h-screen w-72 bg-white border-r border-slate-200 z-40 shadow-xl shadow-slate-900/5
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
@@ -194,9 +195,16 @@ export default function Navigation() {
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="px-6 py-6 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-teal-600">Granimar CR</h1>
-            <p className="text-sm text-gray-600 mt-1">Sistema de Gestión</p>
+          <div className="px-5 py-5 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-md shadow-teal-900/15">
+                <Package className="h-5 w-5" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold tracking-tight text-slate-900">Granimar CR</h1>
+                <p className="text-xs font-medium text-slate-500 mt-0.5">Sistema de Gestión</p>
+              </div>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -207,7 +215,7 @@ export default function Navigation() {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-slate-100 bg-slate-50/70">
             <div className="flex items-center justify-between">
               <div className="text-xs text-gray-500">
                 © 2025 Granimar CR
